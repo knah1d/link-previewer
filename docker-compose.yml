@@ -1,8 +1,27 @@
+version: '3'
+
 services:
   api:
-    build: .
-    container_name: node-api
+    build: 
+      context: ./api
+    container_name: link-previewer-api
     restart: always
+    environment:
+      - NODE_ENV=production
+    networks:
+      - link-previewer-network
+
+  client:
+    build:
+      context: ./client
+    container_name: link-previewer-client
+    restart: always
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+    networks:
+      - link-previewer-network
 
   nginx:
     image: nginx:latest
@@ -13,3 +32,10 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - api
+      - client
+    networks:
+      - link-previewer-network
+
+networks:
+  link-previewer-network:
+    driver: bridge
